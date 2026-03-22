@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FSE | KPI Dashboard 2026 vs 2025</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #1e2d45;
+    --accent: #e8a020;
+    --accent2: #f0b840;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --header-h: 72px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 13px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, #0d1420 0%, #141e30 60%, #1a2840 100%);
+    border-bottom: 2px solid var(--accent);
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+  }
+
+  .logo-block {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+
+  .logo-svg {
+    width: 52px;
+    height: 52px;
+  }
+
+  .brand-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .brand-sub {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  .header-divider {
+    width: 1px;
+    height: 36px;
+    background: var(--border);
+    margin: 0 8px;
+  }
+
+  .header-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--text);
+    text-transform: uppercase;
+  }
+
+  .header-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(16,185,129,0.12);
+    border: 1px solid rgba(16,185,129,0.3);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--green);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .live-dot {
+    width: 7px; height: 7px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 1.6s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  .year-badge {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 2px;
+  }
+
+  /* ── NAV TABS ── */
+  .tabs {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    overflow-x: auto;
+    padding: 0 24px;
+    gap: 0;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    padding: 13px 20px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* ── MAIN ── */
+  main {
+    padding: 20px 24px 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── SUMMARY CARDS ── */
+  .summary-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 900px) {
+    .summary-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .summary-row { grid-template-columns: 1fr 1fr; }
+  }
+
+  .sum-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .sum-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .sum-card.total::before { background: var(--accent); }
+  .sum-card.good::before { background: var(--green); }
+  .sum-card.warn::before { background: var(--amber); }
+  .sum-card.bad::before { background: var(--red); }
+
+  .sum-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .sum-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .sum-card.total .sum-value { color: var(--accent); }
+  .sum-card.good .sum-value { color: var(--green); }
+  .sum-card.warn .sum-value { color: var(--amber); }
+  .sum-card.bad .sum-value { color: var(--red); }
+  .sum-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── COMPLIANCE BAR ── */
+  .compliance-bar-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .compliance-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .compliance-track {
+    flex: 1;
+    min-width: 160px;
+    height: 10px;
+    background: var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .compliance-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--green), #34d399);
+    transition: width 0.8s ease;
+  }
+  .compliance-pct {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green);
+    flex-shrink: 0;
+  }
+
+  /* ── CATEGORY GRID ── */
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 1100px) { .category-grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 600px) { .category-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .cat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .cat-name {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .cat-pct {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+  }
+  .cat-dots { font-size: 10px; margin-top: 4px; color: var(--muted); }
+
+  /* ── KPI TABLE ── */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .table-header-row {
+    padding: 14px 20px 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .table-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .filter-btns {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+  .filter-btn.f-green.active { background: var(--green); border-color: var(--green); }
+  .filter-btn.f-amber.active { background: var(--amber); border-color: var(--amber); }
+  .filter-btn.f-red.active { background: var(--red); border-color: var(--red); }
+
+  .kpi-table { width: 100%; border-collapse: collapse; }
+  .kpi-table th {
+    background: var(--surface2);
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .kpi-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(30,45,69,0.5);
+    vertical-align: middle;
+  }
+  .kpi-table tr:last-child td { border-bottom: none; }
+  .kpi-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .kpi-name { font-weight: 500; }
+  .kpi-cat-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: rgba(232,160,32,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(232,160,32,0.2);
+  }
+  .val-2026 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .val-2025 { color: var(--muted); font-size: 12px; }
+  .val-target { color: var(--muted); font-size: 12px; }
+  .yoy-pos { color: var(--green); font-weight: 600; }
+  .yoy-neg { color: var(--red); font-weight: 600; }
+  .yoy-neu { color: var(--muted); }
+
+  .badge-on { display: inline-flex; align-items: center; gap: 5px; background: rgba(16,185,129,0.12); color: var(--green); border: 1px solid rgba(16,185,129,0.25); border-radius: 20px; padding: 3px 10px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+  .badge-risk { display: inline-flex; align-items: center; gap: 5px; background: rgba(245,158,11,0.12); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); border-radius: 20px; padding: 3px 10px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+  .badge-crit { display: inline-flex; align-items: center; gap: 5px; background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.25); border-radius: 20px; padding: 3px 10px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+
+  .trend-up { color: var(--green); }
+  .trend-dn { color: var(--red); }
+  .trend-st { color: var(--muted); }
+
+  /* editable cell */
+  .editable-cell {
+    background: rgba(232,160,32,0.07);
+    border: 1px dashed rgba(232,160,32,0.35);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--accent2);
+    width: 70px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .editable-cell:focus {
+    border-color: var(--accent);
+    background: rgba(232,160,32,0.14);
+    box-shadow: 0 0 0 2px rgba(232,160,32,0.2);
+  }
+  .editable-cell.prev {
+    background: rgba(100,116,139,0.07);
+    border-color: rgba(100,116,139,0.3);
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .editable-cell.prev:focus { border-color: var(--muted); background: rgba(100,116,139,0.12); }
+
+  .edit-hint {
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    margin-left: 4px;
+    opacity: 0.7;
+  }
+
+  /* ── CHARTS VIEW ── */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 800px) { .charts-grid { grid-template-columns: 1fr; } }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .chart-card.full { grid-column: 1 / -1; }
+  .chart-card-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  /* ── RISK VIEW ── */
+  .risk-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .risk-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    border-left: 4px solid var(--border);
+  }
+  .risk-card.crit { border-left-color: var(--red); }
+  .risk-card.risk { border-left-color: var(--amber); }
+  .risk-card.good { border-left-color: var(--green); }
+
+  .risk-kpi-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .risk-meta { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+  .risk-action {
+    font-size: 12px;
+    color: var(--text);
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    padding: 8px 10px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+  .risk-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .action-status {
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .action-status.open { background: rgba(245,158,11,0.12); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); }
+  .action-status.closed { background: rgba(16,185,129,0.12); color: var(--green); border: 1px solid rgba(16,185,129,0.25); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    header { padding: 0 14px; }
+    main { padding: 14px 12px 40px; }
+    .kpi-table th, .kpi-table td { padding: 8px 10px; }
+    .kpi-table .hide-sm { display: none; }
+    .brand-name { font-size: 16px; }
+    .logo-svg { width: 38px; height: 38px; }
+  }
+
+  /* ── FOOTER ── */
+  .dashboard-footer {
+    text-align: center;
+    padding: 16px;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+  }
+
+  .section-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    margin-top: 20px;
+  }
+
+  /* ── ACCESS CONTROL ── */
+  #login-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: linear-gradient(135deg, #0a0e1a 0%, #0d1420 60%, #111827 100%);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 0;
+  }
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: 14px;
+    padding: 40px 36px;
+    width: 100%; max-width: 380px;
+    text-align: center;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  }
+  .login-logo { width: 70px; height: 70px; object-fit: contain; margin-bottom: 16px; }
+  .login-brand {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px; font-weight: 700;
+    color: var(--accent); letter-spacing: 4px;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .login-subtitle {
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .login-field-label {
+    font-size: 10px; color: var(--muted);
+    letter-spacing: 2px; text-transform: uppercase;
+    text-align: left; margin-bottom: 6px; display: block;
+  }
+  .login-input {
+    width: 100%; padding: 12px 16px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--text);
+    font-size: 15px; font-family: 'Inter', sans-serif;
+    outline: none; margin-bottom: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    letter-spacing: 2px;
+  }
+  .login-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232,160,32,0.15); }
+  .login-btn {
+    width: 100%; padding: 13px;
+    background: var(--accent); color: #000;
+    border: none; border-radius: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s, transform 0.1s;
+    margin-bottom: 14px;
+  }
+  .login-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+  .login-btn:active { transform: translateY(0); }
+  .login-error {
+    color: var(--red); font-size: 11px;
+    letter-spacing: 1px; margin-top: -8px; margin-bottom: 10px;
+    display: none;
+  }
+  .view-only-link {
+    font-size: 11px; color: var(--muted);
+    cursor: pointer; text-decoration: underline;
+    letter-spacing: 1px;
+  }
+  .view-only-link:hover { color: var(--text); }
+
+  /* Admin badge in header */
+  .admin-badge {
+    display: none;
+    align-items: center; gap: 7px;
+    background: rgba(232,160,32,0.12);
+    border: 1px solid rgba(232,160,32,0.35);
+    border-radius: 20px; padding: 5px 12px;
+    font-size: 11px; font-weight: 600;
+    color: var(--accent); letter-spacing: 1px;
+    text-transform: uppercase; cursor: pointer;
+  }
+  .admin-badge:hover { background: rgba(232,160,32,0.2); }
+
+  /* View-only toast */
+  #viewonly-toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-left: 3px solid var(--amber);
+    border-radius: 10px; padding: 12px 22px;
+    font-size: 12px; color: var(--text);
+    z-index: 9998; opacity: 0; pointer-events: none;
+    transition: opacity 0.3s; white-space: nowrap;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  #viewonly-toast.show { opacity: 1; }
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN OVERLAY ══════════════ -->
+<div id="login-overlay">
+  <div class="login-box">
+    <img class="login-logo" src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCABtAJ4DASIAAhEBAxEB/8QAHQAAAgIDAQEBAAAAAAAAAAAAAAgGBwQFCQEDAv/EAEUQAAEDAwIEAwUEBQkIAwAAAAECAwQABREGBxIhMUEIE2EUIlFxgRUyQqEjM1KRsRYYJDREYnKCwUNTVmODlKKy0dLx/8QAGwEAAQUBAQAAAAAAAAAAAAAABAABAgMFBgf/xAAxEQABAwIFAgQFAwUAAAAAAAABAAIDBBEFEiExQRNhBlFxkSIysdHwFCOhM0KBwfH/2gAMAwEAAhEDEQA/AHLooopJIooopJIqkNx/ELa9NXu4WK2WGXPnQnCy448sNNBY646qIHyFXfSUeJ20G07xXRQRwtzm25aOQGeJOFHl/eSaGqpHxsu1b/h2ip6ypMc4vpca25C/eqt99xL6hxlm5NWeOs/cgN8KwPh5hyr92KkWy2+9zscxFo1rLkXK0uHCJi/fejH4qPVaPzHbPSqOrwkDqRWYJ5A7Ndd9Jg9FJCYemAOw19bro3arhCutuYuNtlNS4khAW080riStJ7g193HENNlxxaUITzKlHAFc/LNH1pcLYq2WZjUUm3pWHFR4qXiyFHorhTyyfjTCbP6m3Kgso0zr7Rd8udneBaE12MVuNJIxwuD8aPXqPWtGKqzmxC4fEPDhpWF0codbjQG3vqfwK+0y4iiAmUwSeQAcHOtPrzV9h0Tp9696gmpjx2x7iBzceV2QhP4lH/8AeVUBvT4f5EYu6g29DymshTtpSolQGeZZJP8A4n6fCqh1hpy6N26OxqSFdoC0ApaclNODBA5gFXI1oNYDyuUdI5vCxt6d5tQbh3LgdcXAs7D3mRITK8cJH3VrI+8sfHoO1Ymjd9dztKqCYupXrhGAA9nuQ9oQAPgT7w+hqGXDTr7QU7FmxpSB8F8Kv3GtI+zIb911pxv/ABJIq+wtZDZnXvdO9sF4ijuLqePpW56aVCuTrbi/aYrvGxhCSo5CveT0x35mr/pLfADaQ/uBqG7q6Q7cllPPHvOLz078kU6VDSAA2CLiJLblFFFFQViKKKKSSK1Wq9Q2jS1ikXq9y0RYbAypR5lR7JSO6j2FbWlI8WDmuXNWAXxhbWm23MWssnLKjjmpZ/3nXke3SqZ5emzMAtPCMPbX1Iic6w/k9h3X4uHiP1sdRyJluYtyLWXP0EJ9jJCB04lgg8R6n8qk9m8UKgEpvWkiT+JcOV6dkrHx9aW+issVMo5XosmAYe9oaYhp5XH0TA7meI6bPaVA0NFct7KkjjnSkDzvUIRzCfmc+mKqHT2n9X7gXtxNtjTrzNUrL8h1wlKM91uKOB++rD2N2Sl6xQ3ftSefAsRwpltPuuzOfUfso9ep7fGmusNmtVhtjdts1vjwYbf3WmUBI+fqfU86IZDJP8Uh0WHU4pRYMDBRsBfyfudz6DQKgtDeGeMlDUrWV4cec5KVDgnhQPRThGT9APnVxaZ250RpxtKbTpq3NLH+1caDjh/zqyfzqVUUayCNmwXKVeLVlWf3JDbyGg9gvEJShAQhISlIwABgAV7RRVqzkV4tKVoKFpCkkYIIyDXtFJJRHVW2uh9SjiumnohdHR5keS4PqjGfrmqc3B8O01qMuTom5JkEK4vY5pAUR8EudM/MD50yNFSDiFB0bXbrnBqKRrHbfUjcuIu56bvKXcuJTlsrHqPurSfqDTHbSeJZiVph93cKC5ElRQcSojJUmSAAclH4Vc+3I+lXXuLoTTOvrGu06ltrcpvB8l4DDrCiMcSFdUn8vjSh7v7SXDbO3zeF5642mUlampyhzCuEAIX+yrl8j2+FWgtfod1SWuj1GytK9+K6y/0Eab0pcZwmulttct1LGMEAkpHEev8ACtBYPFLeRqGTK1HZ4DFgizRFeRDStTyEKzh3JPvFOBkADIz3pbIalIi6bUhXAoSFnP8A1K+ryguyX9SQRxXBBwRzHJVS6bVAyu8100tU+FdLbHuVuktSoclsOsvNqylaSMgg1k0pfgPvmsSmTYRDkS9JpC3RIcCUohPZzwoUea+LukdOvLnltKoc3KbIpjswuisK+2m23y1P2u7wmZsJ9PC4y6nKVD/Q+tazUGttIWBKjeNSWuGUnhKFyE8YPPlwg57HtVcax8Quh4lpmNWKXMn3BTK0xlNxSG0ucPuklWOWfQ9KpfKxo+IrQpaCrmcDCw+tj9Utm7Nnsmn9w7vZtPSXJFviu8CSs5KF495vPcJPLPpUy8Nu2iNbagXeLu3mx2xwcbZH9Ze6hv8AwjkVfQd6qc+0SpGSVPyX3OZPMrWo/wASTT+bZ6ZY0hoa12FlCUrjsgvkc+N1XNas9/eJrNpohLISRoF3mPV78PomxNdd7tL86bn1+6kaEpQhKEJCUpGAAMAD4V7UA3W3X03t6luPPD025PI42oUfHHw5xxKJ5JHX546VWY8UDJSFfyJmEHuJYx/61oOnjYbEriKfBq2pZ1I47g86D6lMXRS6fzoGP+CZn/dj/wCtSDQ++srVdycYi6NdiQoyPOnz5M0JYiNDqtZ4fhnAHM0zaiNxsCrJcCroWGR7LAbm4+6uuil01R4rNP2+8Ow7LpW7XaO2vHtRUGkuAcipIwTjPxxmsD+dnEAWVaGnjgTxHEni+nJFFdN3ksTqt80zVFLs74qLJAlR03fSd0YjOgEusOpdUjpn3SBnA9aui3a00zcNFDWUS6suWQsl4yeYCQORBHUKzyx1zTFpG6kHtOykNFL/AKj8TlmhS3GbPpyTc0pVhBVKQypYzjPDg4HzrQJ8WnFJVHG3c0LScKKrgkJHqTwdPWnyOUeq3zTP1rtTWO2aksMyx3mKiVBmNFt5tXcHuPgR1B7EVQS/FTa+HDWlJbzvCSltt8qKiOwPBzq8dB3i737Tca7XmwuWJ+QnjTCdd43EJPTj5DB9O3emLS3dOHtdoEh27+g39t9bWnTUl1yRFQ8XYkgpALzKnPdPwyOh9RW+8Om31t3G1PfbRdriY0SPMTIeYRyckoGQUpPbtk9cHlTAeMTR6b9oKDqFloGXYZzb6lJTlRYWoJcHrglKvoaV3aTVC9G6xGow6ptqLem/acE+8woKS4DjqOEk/QVe1xc1DOaGv12XQSwWe12C0R7RZYEeBAjICGmGUcKUj/59eprOqFaZ3Y241GB9k6xtLqiM8DjwZXjOPurwetTGO+xIbDsd5t5s9FIUFA/UUOQeUWCDsucCyXHFOuKK3FklS1HKlE9ST3oq6b74bdcQ3XPsuZarmyCfL/SllwjtkKGAfqagWpdttdacaefu+mZrMZgEuSEAONJA6niSSAPU4rBdDI3cL2KDE6OewjkB7X19jqvhtVHalbm6ZjvpKm13NniGcdFA/wART/Vz10Jc0WbW1juznD5cSey6skEgJChk8vTNdCUkKSFJIIIyCO9HUHylch4xa7rRHix+v/El/iWWGt+Li6WQ+EeyKLR5hzDaDw/Xp9asBvxAX1ptLTe1khDaAEpSlLgCQOgA8uoP4hDjxFu8/wC0QP4N05NNExznvym2qniNTBDR0omiz3aOSLaDyS5N7/6iccS23tbLUtaglKQHMknoP1dWdqay6i1xs5d7PPgw7Hd7rCUhDCHC4GSeaQtWBz5c8dM96n9afW327/JO5HTCmk3kMEwy6kFPGOYBB5c+YoyNjmm7nXXM1tVTzNyxQhn+Sfqk8231LrPY7UF2iXnbu4XNM5KDlz3VI4c44HQlSSkknPxIFTyX4pJEby0Haec46sZ4UTMhPoT5NG3HiFuNs1Fd7Tui/wDdIEZLUJLTrJGeJKkdTnI59setTv8AnH7YcJU1JuDhAzhEUZ64/aooi51CyGkAaOVfai3x0JrK2sW3Xe3V0YtxdS4C2+fMbPTi5BBxg9j9K3W9ls0hYvDUBoV5DVhlT2pCFNSVuJc4s55qUT1AyD3HTNRfxH7n6T17pGNaNNRlKne1haZchjhU3wjHCgDJVxZx9PlWRN211m94QV2VTJXclXAXT2VxJC0scWSkDqFYyrB9e/Kntax2TXJuN1C9p927nt5ZnrTa9ul31UiSt12e22vPQANkpQc8OD371Y8XxEakeYUtW1UlB8tSgCl3njHL9X61qdiN5tK7f6Ylaev8O7JcVOdkMuxo/moUCBxJPMcJBT0PXNWVF8SO20gyAF3dsxwC4HIgHUZGPe58qZw12TtOnzKP7c78X7U+q7JZZW20m2t3CSpl2QpLmGEgEhXNsDt3IphKpA+KLa4R25HHe/KWpSQoQCeYPPvVwafvFsv9oj3azzGpkKQnibdbOQfQ/AjuDzFVuHaytYe91g7hRmJmhb7Gkt+Y0uA9xJzjOEE/6VzdbObDeieZM5P8DXRHeO8s2HbW9znnEIKo5jtBX4luHgSAO/NVc7WQfsS8JSCT7ekAAZzyNWw7KifcL42xhhdqYWpYJz7wxnHOpfHul4tM2Qiy3ebbnjgH2WQpHEjHLoeYzWo0noPXV4gA2TSN0moeyQpLShk8x3AAHLue1Wnpbw3bnXtlBvqINjQhvLS3ZIcdPTCClGcdT1PLFWlwG5VQa47BO3WFfrZHvNkm2mWnLExhbDnLPJQIz+dZtL9vhvyzbFS9N6KcS/PTlt+5AhTbB7hv9pQ+PQetZ8sjY23ct3D6KorJgyAajny7lLbqeyS9PX+4WG4JxIhPKYX8FY6KHoRg/WnG8N+tWdW7eRYzrwN0tSExZSCfeIAwhfyUkfvBpLZL78mQ5IkvOPvOKKnHHFFSlk9SSeZNSLbXWl10Jqhm92w+YnHBJjlWEyGu6T8D3B7GsmCYRPvwvSMYwx1fSBl/jbqPXn3+yd266J0jdbsbtctOWyXPJSTIdYSpzKccJyfhgY+VSCtJojVVm1hp9i9WSUl5hwYWnPvtL7oWOyhW7rYbl3HK8vmMoPTkvduljwiiiipKlaTUOkNLahcS7fNPWy4uJ6OSIyVqH+YjNaZe0+2i1BS9C2AkJ4cmEjp+6ppRT3KawUes+h9G2eS3Jtel7RDeaPE241EQlSD8UnHI/KpDRRTJwLKM3rQGib1NVNuulrTLkq+865GTxK+Z71rkbR7YJJUNBaeyRjJgoP8ApU3op7lNlChKNpNsUBQRoTT6QoYOISOf5VINMaasGmIS4WnrREtcZa/MU1GbCEFXc4HLNbaqj8Qu8tp26s71tgS2H9USGT7LHyFBjI5OODsPgO/ypxd2iY5Wi6rLxma5MjUmn9CW9wltiUiZPUk8ivohH0BJPzFQfwi6OOqtwZc6Qgm32aeia6cclOAHy0fv5/JNVO7c7pMk2u6TpapE9x9a1vvL4islRJUo/E5NTTY7c29bZi93O3stTYbs1sTIbhwHBg80q/CoDoenxojLZtghM4L7ldBaKiW2G4mltxbGm6abuKHlJSPaYqyA/GUfwrT2+fQ9jUtoUiyMBuilX8S+0hs0h/Wemox+zXVcdwjIH9XWT+sSAOSD3HY8+nRqK/LzTbzK2Xm0uNuJKVoUMhQPIgjuKqmiErbFaOG4jLh8wkZtyPMfmy5vZFfWFGkzXfKhRn5TmccLLZWc/QU71o2Z21tjynmdLRXnFLKwZClOhOTnACiQAO3LpU1tlst1rY8i2wIsJrAHAw0lscvQCgW0Dv7iuvm8Ywj+lGT6m33SF6I1fqTQd+M2zyXYryVhMqI6CEPAfgcQf49RTV7X736U1ghmFPdRZLwoYMaQvDbh/wCW4eR+RwfnW03Q2k0rrxKpMtgwLrjCJ8ZICye3GOix8+fqKTfXunHNKauuGnH5TUxcJwIU6hJCVZAPQ9OtI9Wl7hOz9B4hbqC2UD87EfyuhFFIrordnXekghq33pyVEQOERZv6ZsD0zzT9DVvab8T8VTaG9R6Yeacz7zsF0LT8+BWCP3miGVkbt9Fh1XhethN4wHjtv7H/AFdMZRVZ2LfXbS6lpH26qA65gcExhbfCScAFWCn86n92ukK12l26y3VCG0jjW422pzCf2sJBJHyolr2v+U3WFPSzU5tMwt9RZZtFV3I3s20ZZW4NRpeKBkoajOrWfkAnJqL3rxKaIiLU3bbZf7msHHEiEptB5fFWD6dKsDHHhDF7RyrsrCvV2tdkt7lwvFxi2+I2MrekupbQPqaVW9+KPUN3VOiadtEK0+Ty8x4qedQCSMkKCUgjly51RO9d71DqOXCuV/u864LAKAl9fuI7gpQPdTnn0FTER5VbpgNky27PiSjORXrft+6nyVNKLl7dRyQAop/Qtq+8o9lK5Drg0ri5sfUMy6z1RpsubwKdkXCU8XXXFk9VnGMnt8uVWt4Z9nYm5mnlT7peRGt0VXs70Zgf0hRzxAhR5JSckZwTyNOFo3Q+k9IWH7D0/Y4cOCrBcQGwovEfiWo5Kz6nNSzNZoFANdJqVzZgxXLjLi2lgNHygVPYVlKe6lE1ILe203LTp3TtudvE+fISEt8HGXneg4U9MD1+Zp9LltVt1PQ+l3SFqZL4w4uMz5Clde6MfE1gba7N6G2+vcm82CFIM59vyg7JfLpaR3SjPTPc9afrCyboG6w9gtrGNvrMqbPLT2oZ7SBMW2kBtlI5hpAHYE8z3PpirPooqgm5uUSAALBFFFFMnRRRRSSRXPTXN1F81re7sDkSp7zieWDw8ZAyO3ICuhdRDV+2eh9VAqu+n4inz/aGE+U6PXiTgn65oaphdKAAVvYDisWHSOdI0nNYacfnqkLr6w40iZLZhw2HJEl9YQ002niUtR6ADuavHefYy16QsUzUNovksx2klaYkhkLPIdPMBH5g1bGwe2OntK2CBqBCDOvM2Kh1Ut5P6pKwDwNp58IwcE9T+VAMpXl+U6LsqnxHSx03Xj+K+gFra91TcTw164kWxuU7crNHfW3xKiuLWVIP7JUElOflyq0tm9L7s6IU3a7pJtV2sJISGVS1l2MO/lkp6f3Ty+GKueitBlMxhu1cVVY/VVUZjmDSD229FRW8nh+j6lmG8aKnxbBcnFEyWXUKMd4k81YScoV16DB9OtU7ulsjuBoayt3aFdG9QQ0ozLVFhKDkc9yUFZKkYz7w6dwKdeg8xg0WJCFgOiaVy7bdlM3CRiM2GFgcUpDCklw5B55J9a2Go1KuFunRnRlUZDchrn1SOo/JVNluf4ZtLaj1fFvlluj+nPOdJlxY8cONOqPMqSCocBPPOMjn0FTDS+wm29jkIlLtLl1kJbKOOe55icE5PuABP5Vb1W2VHRddUt4ALm/9pXy1NtuGI5CbkFYyUJWlxSQM4xnCvj2pu6xrbb4Fsipi22DGhMJ+60w0ltI+gGKyapc7MboljcosiiiioqSKKKKSS//Z" alt="FSE Logo">
+    <div class="login-brand">FSE</div>
+    <div class="login-subtitle">KPI Dashboard · Admin Access</div>
+    <label class="login-field-label">Admin Password</label>
+    <input type="password" class="login-input" id="pwd-input" placeholder="Enter password" onkeydown="if(event.key==='Enter')tryLogin()">
+    <div class="login-error" id="login-error">⚠ Incorrect password. Try again.</div>
+    <button class="login-btn" onclick="tryLogin()">🔐 Login as Admin</button>
+    <div class="view-only-link" onclick="enterViewOnly()">Continue as View Only →</div>
+  </div>
+</div>
+
+<!-- View-only toast -->
+<div id="viewonly-toast">🔒 View Only — Contact admin to edit values</div>
+
+
+<!-- ══════════════ HEADER ══════════════ -->
+<header>
+  <div class="logo-block">
+    <img src="data:image/png;base64,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" style="width:52px;height:52px;object-fit:contain;" alt="FSE Logo">
+    <div>
+      <div class="brand-name">FSE</div>
+      <div class="brand-sub">Field Services &amp; Engineering</div>
+    </div>
+  </div>
+
+  <div class="header-divider"></div>
+  <div class="header-title">KPI Performance Dashboard</div>
+
+  <div class="header-right">
+    <div class="live-badge"><div class="live-dot"></div>Live</div>
+    <div class="year-badge">2026 vs 2025</div>
+
+    <div class="admin-badge" id="admin-badge" onclick="logoutAdmin()" title="Click to logout">⚙ Admin</div>
+  </div>
+</header>
+
+<!-- ══════════════ TABS ══════════════ -->
+<div class="tabs">
+  <button class="tab active" onclick="showTab('overview')">📊 Overview</button>
+  <button class="tab" onclick="showTab('kpidata')">✏️ KPI Data (Edit)</button>
+  <button class="tab" onclick="showTab('charts')">📈 Charts</button>
+  <button class="tab" onclick="showTab('risk')">⚠️ Risk &amp; Actions</button>
+  <button class="tab" onclick="showTab('performance')">🏅 Performance Cards</button>
+</div>
+
+<!-- ══════════════ MAIN ══════════════ -->
+<main>
+
+<!-- ════ OVERVIEW ════ -->
+<div id="view-overview" class="view active">
+  <div class="summary-row">
+    <div class="sum-card total">
+      <div class="sum-label">Total KPIs</div>
+      <div class="sum-value" id="s-total">18</div>
+      <div class="sum-sub">Monitored indicators</div>
+    </div>
+    <div class="sum-card good">
+      <div class="sum-label">✔ On Target</div>
+      <div class="sum-value" id="s-on">12</div>
+      <div class="sum-sub">Meeting targets</div>
+    </div>
+    <div class="sum-card warn">
+      <div class="sum-label">⚠ At Risk</div>
+      <div class="sum-value" id="s-risk">2</div>
+      <div class="sum-sub">Needs attention</div>
+    </div>
+    <div class="sum-card bad">
+      <div class="sum-label">✖ Critical</div>
+      <div class="sum-value" id="s-crit">4</div>
+      <div class="sum-sub">Immediate action</div>
+    </div>
+  </div>
+
+  <div class="compliance-bar-wrap">
+    <div class="compliance-label">Overall Compliance</div>
+    <div class="compliance-track">
+      <div class="compliance-fill" id="compliance-fill" style="width:66.7%"></div>
+    </div>
+    <div class="compliance-pct" id="compliance-pct">66.7%</div>
+  </div>
+
+  <div class="section-label">Performance by Category</div>
+  <div class="category-grid" id="cat-grid"></div>
+
+  <div class="table-wrap">
+    <div class="table-header-row">
+      <div class="table-title">All KPIs — Summary</div>
+      <div class="filter-btns">
+        <button class="filter-btn active" onclick="filterTable('all', this)">All</button>
+        <button class="filter-btn f-green" onclick="filterTable('on', this)">On Target</button>
+        <button class="filter-btn f-amber" onclick="filterTable('risk', this)">At Risk</button>
+        <button class="filter-btn f-red" onclick="filterTable('crit', this)">Critical</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="kpi-table" id="overview-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>KPI Indicator</th>
+            <th class="hide-sm">Category</th>
+            <th>Target</th>
+            <th>2026</th>
+            <th class="hide-sm">2025</th>
+            <th class="hide-sm">YoY</th>
+            <th class="hide-sm">Trend</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="overview-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════ KPI DATA EDIT ════ -->
+<div id="view-kpidata" class="view">
+  <div class="table-wrap">
+    <div class="table-header-row">
+      <div class="table-title">✏️ Live KPI Data Editor</div>
+      <span style="font-size:11px;color:var(--amber);" id="edit-tab-hint">⚡ Edit blue (2026) or grey (2025) cells — all views update instantly</span>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="kpi-table" id="edit-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>KPI / Indicator</th>
+            <th class="hide-sm">Category</th>
+            <th>Target</th>
+            <th>Dir</th>
+            <th>2026 Current <span class="edit-hint">✏ EDIT</span></th>
+            <th>2025 Previous <span class="edit-hint" style="color:var(--muted)">✏ EDIT</span></th>
+            <th>vs Target</th>
+            <th>YoY</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="edit-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════ CHARTS ════ -->
+<div id="view-charts" class="view">
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-card-title">Status Distribution</div>
+      <canvas id="chart-donut" height="220"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-title">Category Compliance %</div>
+      <canvas id="chart-cat" height="220"></canvas>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-card-title">2026 vs 2025 vs Target — All KPIs</div>
+      <canvas id="chart-bar" height="160"></canvas>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-card-title">YoY Change by KPI</div>
+      <canvas id="chart-yoy" height="140"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ════ RISK & ACTIONS ════ -->
+<div id="view-risk" class="view">
+  <div class="compliance-bar-wrap" style="margin-bottom:16px">
+    <div class="compliance-label">KPIs Requiring Attention</div>
+    <div class="compliance-pct" id="risk-count" style="color:var(--amber)">6 of 18</div>
+    <div style="margin-left:auto;font-size:11px;color:var(--muted)">Updates automatically from KPI Data</div>
+  </div>
+  <div class="risk-cards" id="risk-cards"></div>
+</div>
+
+<!-- ════ PERFORMANCE CARDS ════ -->
+<div id="view-performance" class="view">
+  <div id="perf-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;"></div>
+</div>
+
+</main>
+
+<div class="dashboard-footer">
+  FSE | Field Services &amp; Engineering &nbsp;·&nbsp; KPI Dashboard 2026 vs 2025 &nbsp;·&nbsp; ⚡ Live — All values auto-update on edit
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DATA MODEL
+// ═══════════════════════════════════════════════
+const KPIs = [
+  { id:1,  name:"Customer Satisfaction",          cat:"Quality",       target:90,  dir:"High", v26:100, v25:100 },
+  { id:2,  name:"Complaint Rate",                 cat:"Quality",       target:2,   dir:"Low",  v26:0,   v25:18  },
+  { id:3,  name:"On-Time Delivery",               cat:"Operations",    target:90,  dir:"High", v26:100, v25:89  },
+  { id:4,  name:"NCR Closure Rate",               cat:"Quality",       target:100, dir:"High", v26:100, v25:78  },
+  { id:5,  name:"Supplier On-Time Delivery",      cat:"Supply Chain",  target:90,  dir:"High", v26:91,  v25:95  },
+  { id:6,  name:"Qualified Welders",              cat:"HR / Trade",    target:100, dir:"High", v26:95,  v25:98  },
+  { id:7,  name:"Weld Repair Rate",               cat:"HR / Trade",    target:3,   dir:"Low",  v26:7,   v25:1   },
+  { id:8,  name:"Valid WPS Coverage",             cat:"Quality",       target:100, dir:"High", v26:90,  v25:100 },
+  { id:9,  name:"Welding NCR Rate",               cat:"HR / Trade",    target:3,   dir:"Low",  v26:3,   v25:3   },
+  { id:10, name:"Waste Reduction vs 2024",        cat:"Environment",   target:10,  dir:"High", v26:8,   v25:6   },
+  { id:11, name:"Electricity Reduction",          cat:"Environment",   target:5,   dir:"High", v26:4,   v25:2   },
+  { id:12, name:"Waste Segregation Compliance",   cat:"Environment",   target:90,  dir:"High", v26:95,  v25:98  },
+  { id:13, name:"Environmental Incidents",        cat:"Environment",   target:0,   dir:"Zero", v26:0,   v25:1   },
+  { id:14, name:"Fatalities",                     cat:"Safety",        target:0,   dir:"Zero", v26:0,   v25:0   },
+  { id:15, name:"Lost Time Injuries",             cat:"Safety",        target:0,   dir:"Zero", v26:0,   v25:3   },
+  { id:16, name:"Near Miss Reporting Increase",   cat:"Safety",        target:4,   dir:"High", v26:0,   v25:3   },
+  { id:17, name:"Legal Compliance",               cat:"Compliance",    target:100, dir:"High", v26:100, v25:89  },
+  { id:18, name:"Internal / External Audit Results", cat:"Compliance", target:90,  dir:"High", v26:98,  v25:92  },
+];
+
+const RISK_ACTIONS = [
+  { id:6,  action:"Identify out-of-qualification welders; schedule qualification tests; update training plan.", responsible:"HR / Workshop Supervisor", timeframe:"60 Days", actionStatus:"Open" },
+  { id:7,  action:"Root cause analysis on all repairs; re-test affected welders; increase weld inspection frequency.", responsible:"QC / Workshop Supervisor", timeframe:"Immediate", actionStatus:"Open" },
+  { id:8,  action:"Identify missing WPS documents; engage welding engineer to draft outstanding procedures.", responsible:"Quality Manager", timeframe:"30 Days", actionStatus:"Open" },
+  { id:10, action:"Review waste stream data; identify high-waste fabrication processes; implement lean practices.", responsible:"Operations Manager", timeframe:"Quarterly", actionStatus:"Open" },
+  { id:11, action:"Conduct energy audit; identify high-consumption equipment; implement switch-off protocols.", responsible:"Operations / HSE", timeframe:"Quarterly", actionStatus:"Open" },
+  { id:16, action:"Investigate root cause of near-miss under-reporting; implement toolbox talks and reporting culture drive.", responsible:"Management", timeframe:"30 Days", actionStatus:"Open" },
+];
+
+// ═══════════════════════════════════════════════
+// STATUS LOGIC
+// ═══════════════════════════════════════════════
+function getStatus(kpi) {
+  const { v26, target, dir } = kpi;
+  if (dir === "High" || dir === "Zero") {
+    const diff = v26 - target;
+    if (diff >= 0) return "on";
+    if (diff >= -5) return "risk";
+    return "crit";
+  } else { // Low
+    const diff = v26 - target;
+    if (diff <= 0) return "on";
+    if (diff <= 2) return "risk";
+    return "crit";
+  }
+}
+
+function getTrend(kpi) {
+  const { v26, v25, dir } = kpi;
+  if (v26 === v25) return { sym: "→", cls: "trend-st", txt: "Stable" };
+  if (dir === "High" || dir === "Zero") {
+    return v26 > v25
+      ? { sym: "↑", cls: "trend-up", txt: "Improving" }
+      : { sym: "↓", cls: "trend-dn", txt: "Worsening" };
+  } else {
+    return v26 < v25
+      ? { sym: "↑", cls: "trend-up", txt: "Improving" }
+      : { sym: "↓", cls: "trend-dn", txt: "Worsening" };
+  }
+}
+
+function vsTarget(kpi) {
+  const { v26, target, dir } = kpi;
+  if (dir === "Low") return target - v26;
+  if (dir === "Zero") return -v26;
+  return v26 - target;
+}
+
+function badgeHTML(status) {
+  if (status === "on")   return `<span class="badge-on">✔ On Target</span>`;
+  if (status === "risk") return `<span class="badge-risk">⚠ At Risk</span>`;
+  return `<span class="badge-crit">✖ Critical</span>`;
+}
+
+function yoyHTML(yoy) {
+  if (yoy > 0) return `<span class="yoy-pos">+${yoy}</span>`;
+  if (yoy < 0) return `<span class="yoy-neg">${yoy}</span>`;
+  return `<span class="yoy-neu">0</span>`;
+}
+
+// ═══════════════════════════════════════════════
+// COMPUTED STATS
+// ═══════════════════════════════════════════════
+function computeStats() {
+  let on=0, risk=0, crit=0;
+  KPIs.forEach(k => {
+    const s = getStatus(k);
+    if (s === "on") on++;
+    else if (s === "risk") risk++;
+    else crit++;
+  });
+  return { total: KPIs.length, on, risk, crit, pct: (on/KPIs.length*100).toFixed(1) };
+}
+
+function computeCats() {
+  const cats = {};
+  KPIs.forEach(k => {
+    if (!cats[k.cat]) cats[k.cat] = { total:0, on:0 };
+    cats[k.cat].total++;
+    if (getStatus(k) === "on") cats[k.cat].on++;
+  });
+  return cats;
+}
+
+// ═══════════════════════════════════════════════
+// RENDER OVERVIEW SUMMARY
+// ═══════════════════════════════════════════════
+function renderSummary() {
+  const s = computeStats();
+  document.getElementById("s-total").textContent = s.total;
+  document.getElementById("s-on").textContent = s.on;
+  document.getElementById("s-risk").textContent = s.risk;
+  document.getElementById("s-crit").textContent = s.crit;
+  document.getElementById("compliance-pct").textContent = s.pct + "%";
+  document.getElementById("compliance-fill").style.width = s.pct + "%";
+}
+
+function renderCatGrid() {
+  const cats = computeCats();
+  const colors = { on:"var(--green)", risk:"var(--amber)", bad:"var(--red)" };
+  let html = "";
+  for (const [name, c] of Object.entries(cats)) {
+    const pct = (c.on/c.total*100).toFixed(0);
+    const col = pct >= 80 ? "var(--green)" : pct >= 50 ? "var(--amber)" : "var(--red)";
+    html += `<div class="cat-card">
+      <div class="cat-name">${name}</div>
+      <div class="cat-pct" style="color:${col}">${pct}%</div>
+      <div class="cat-dots">${c.on}/${c.total} on target</div>
+    </div>`;
+  }
+  document.getElementById("cat-grid").innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════
+// RENDER OVERVIEW TABLE
+// ═══════════════════════════════════════════════
+let currentFilter = "all";
+function renderOverviewTable() {
+  const tbody = document.getElementById("overview-tbody");
+  let html = "";
+  KPIs.forEach(k => {
+    const s = getStatus(k);
+    const yoy = k.v26 - k.v25;
+    const trend = getTrend(k);
+    if (currentFilter !== "all" && s !== currentFilter) return;
+    html += `<tr>
+      <td style="color:var(--muted)">${k.id}</td>
+      <td class="kpi-name">${k.name}</td>
+      <td class="hide-sm"><span class="kpi-cat-tag">${k.cat}</span></td>
+      <td class="val-target">${k.target}</td>
+      <td><span class="val-2026" style="color:${s==='crit'?'var(--red)':s==='risk'?'var(--amber)':'var(--text)'}">${k.v26}</span></td>
+      <td class="val-2025 hide-sm">${k.v25}</td>
+      <td class="hide-sm">${yoyHTML(yoy)}</td>
+      <td class="hide-sm"><span class="${trend.cls}">${trend.sym} ${trend.txt}</span></td>
+      <td>${badgeHTML(s)}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+function filterTable(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderOverviewTable();
+}
+
+// ═══════════════════════════════════════════════
+// RENDER EDIT TABLE
+// ═══════════════════════════════════════════════
+function renderEditTable() {
+  const tbody = document.getElementById("edit-tbody");
+  let html = "";
+  KPIs.forEach((k, idx) => {
+    const s = getStatus(k);
+    const yoy = k.v26 - k.v25;
+    const vt = vsTarget(k);
+    const cell26 = isAdmin
+      ? `<input type="number" class="editable-cell" value="${k.v26}" onchange="updateKPI(${idx},'v26',this.value)" oninput="updateKPI(${idx},'v26',this.value)">`
+      : `<span class="val-2026" style="cursor:not-allowed" onclick="showViewOnlyToast()">${k.v26}</span>`;
+    const cell25 = isAdmin
+      ? `<input type="number" class="editable-cell prev" value="${k.v25}" onchange="updateKPI(${idx},'v25',this.value)" oninput="updateKPI(${idx},'v25',this.value)">`
+      : `<span style="color:var(--muted);cursor:not-allowed" onclick="showViewOnlyToast()">${k.v25}</span>`;
+    html += `<tr>
+      <td style="color:var(--muted)">${k.id}</td>
+      <td class="kpi-name">${k.name}</td>
+      <td class="hide-sm"><span class="kpi-cat-tag">${k.cat}</span></td>
+      <td class="val-target">${k.target}</td>
+      <td style="color:var(--muted);font-size:11px">${k.dir}</td>
+      <td>${cell26}</td>
+      <td>${cell25}</td>
+      <td>${yoyHTML(vt)}</td>
+      <td>${yoyHTML(yoy)}</td>
+      <td id="edit-status-${idx}">${badgeHTML(s)}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+function updateKPI(idx, field, val) {
+  const num = parseFloat(val);
+  if (isNaN(num)) return;
+  KPIs[idx][field] = num;
+  // Update status cell in edit table
+  const s = getStatus(KPIs[idx]);
+  const sc = document.getElementById("edit-status-" + idx);
+  if (sc) sc.innerHTML = badgeHTML(s);
+  // Refresh all computed views
+  refreshAll();
+}
+
+// ═══════════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════════
+let chartDonut, chartCat, chartBar, chartYoy;
+
+function initCharts() {
+  const s = computeStats();
+  const cats = computeCats();
+
+  // Donut
+  if (chartDonut) chartDonut.destroy();
+  chartDonut = new Chart(document.getElementById("chart-donut"), {
+    type: "doughnut",
+    data: {
+      labels: ["On Target", "At Risk", "Critical"],
+      datasets: [{ data: [s.on, s.risk, s.crit],
+        backgroundColor: ["#10b981","#f59e0b","#ef4444"],
+        borderWidth: 0, hoverOffset: 8 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position:"bottom", labels:{ color:"#94a3b8", font:{size:11} } } },
+      cutout: "65%"
+    }
+  });
+
+  // Category bar
+  const catNames = Object.keys(cats);
+  const catPcts = catNames.map(n => (cats[n].on/cats[n].total*100).toFixed(0));
+  const catColors = catPcts.map(p => p >= 80 ? "#10b981" : p >= 50 ? "#f59e0b" : "#ef4444");
+  if (chartCat) chartCat.destroy();
+  chartCat = new Chart(document.getElementById("chart-cat"), {
+    type: "bar",
+    data: {
+      labels: catNames,
+      datasets: [{ label:"% On Target", data: catPcts, backgroundColor: catColors, borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      scales: {
+        y: { grid:{ color:"#1e2d45" }, ticks:{ color:"#64748b" }, max:100 },
+        x: { grid:{ display:false }, ticks:{ color:"#64748b" } }
+      },
+      plugins: { legend:{ display:false } }
+    }
+  });
+
+  // Comparison bar
+  const labels = KPIs.map(k => k.name.length > 18 ? k.name.slice(0,18)+"…" : k.name);
+  if (chartBar) chartBar.destroy();
+  chartBar = new Chart(document.getElementById("chart-bar"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        { label:"Target",       data: KPIs.map(k=>k.target), backgroundColor:"rgba(232,160,32,0.25)", borderColor:"#e8a020", borderWidth:1, borderRadius:2 },
+        { label:"2025 Actual",  data: KPIs.map(k=>k.v25),   backgroundColor:"rgba(100,116,139,0.4)", borderRadius:2 },
+        { label:"2026 Current", data: KPIs.map(k=>k.v26),   backgroundColor: KPIs.map(k=>{
+          const s=getStatus(k);
+          return s==="on"?"rgba(16,185,129,0.7)":s==="risk"?"rgba(245,158,11,0.7)":"rgba(239,68,68,0.7)";
+        }), borderRadius:2 },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:true,
+      scales: {
+        y:{ grid:{color:"#1e2d45"}, ticks:{color:"#64748b"} },
+        x:{ grid:{display:false}, ticks:{color:"#64748b", font:{size:9}, maxRotation:45} }
+      },
+      plugins:{ legend:{ labels:{ color:"#94a3b8", font:{size:11} } } }
+    }
+  });
+
+  // YoY chart
+  const yoys = KPIs.map(k => k.v26 - k.v25);
+  if (chartYoy) chartYoy.destroy();
+  chartYoy = new Chart(document.getElementById("chart-yoy"), {
+    type:"bar",
+    data:{
+      labels,
+      datasets:[{ label:"YoY Change", data: yoys,
+        backgroundColor: yoys.map(y => y >= 0 ? "rgba(16,185,129,0.65)" : "rgba(239,68,68,0.65)"),
+        borderRadius:3 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:true,
+      scales:{
+        y:{ grid:{color:"#1e2d45"}, ticks:{color:"#64748b"} },
+        x:{ grid:{display:false}, ticks:{color:"#64748b", font:{size:9}, maxRotation:45} }
+      },
+      plugins:{ legend:{ display:false } }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// RENDER RISK CARDS
+// ═══════════════════════════════════════════════
+function renderRiskCards() {
+  const attn = KPIs.filter(k => getStatus(k) !== "on");
+  const s = computeStats();
+  document.getElementById("risk-count").textContent = `${s.risk + s.crit} of 18`;
+
+  let html = "";
+  KPIs.forEach(k => {
+    const st = getStatus(k);
+    const ra = RISK_ACTIONS.find(r => r.id === k.id);
+    const cls = st === "crit" ? "crit" : st === "risk" ? "risk" : "good";
+    const action = ra ? ra.action : "Investigate root cause; implement corrective action; monitor progress.";
+    const responsible = ra ? ra.responsible : "Management";
+    const timeframe = ra ? ra.timeframe : "30 Days";
+    const aStatus = ra ? ra.actionStatus : (k.id === 1 ? "Closed" : "Open");
+    html += `<div class="risk-card ${cls}">
+      <div class="risk-kpi-name">${k.name}</div>
+      <div class="risk-meta">
+        <span class="kpi-cat-tag">${k.cat}</span>&nbsp;
+        ${badgeHTML(st)}&nbsp;
+        <span style="color:var(--muted)">Current: ${k.v26} | Target: ${k.target}</span>
+      </div>
+      <div class="risk-action">📋 ${action}</div>
+      <div class="risk-footer">
+        <span>👤 ${responsible} &nbsp;·&nbsp; ⏱ ${timeframe}</span>
+        <span class="action-status ${aStatus.toLowerCase()}">${aStatus}</span>
+      </div>
+    </div>`;
+  });
+  document.getElementById("risk-cards").innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════
+// RENDER PERFORMANCE CARDS
+// ═══════════════════════════════════════════════
+function renderPerfCards() {
+  let html = "";
+  KPIs.forEach(k => {
+    const s = getStatus(k);
+    const trend = getTrend(k);
+    const yoy = k.v26 - k.v25;
+    const borderCol = s === "on" ? "var(--green)" : s === "risk" ? "var(--amber)" : "var(--red)";
+    const bgCol = s === "on" ? "rgba(16,185,129,0.06)" : s === "risk" ? "rgba(245,158,11,0.06)" : "rgba(239,68,68,0.06)";
+    const comment = s === "on"
+      ? `✔ Meeting target. YoY: ${yoy>=0?"+":""}${yoy} pts vs 2025`
+      : s === "risk"
+      ? `⚠ At risk — ${Math.abs(k.v26-k.target)} pts from target. Review and implement action plan.`
+      : `✖ CRITICAL — ${Math.abs(k.v26-k.target)} pts from target. Immediate management action required.`;
+
+    html += `<div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid ${borderCol};background:${bgCol};border-radius:10px;padding:16px 18px;">
+      <div style="font-weight:600;font-size:14px;margin-bottom:6px">${k.name}</div>
+      <div style="display:flex;gap:20px;align-items:center;margin-bottom:10px">
+        <div>
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Category</div>
+          <div style="font-size:12px;font-weight:500">${k.cat}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Target</div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700">${k.target}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">2025</div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:18px;font-weight:700;color:var(--muted)">${k.v25}</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">2026</div>
+          <div style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:${borderCol}">${k.v26}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        ${badgeHTML(s)}
+        <span class="${trend.cls}" style="font-size:12px">${trend.sym} ${trend.txt}</span>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--text);background:rgba(255,255,255,0.03);border-radius:6px;padding:8px 10px;">${comment}</div>
+    </div>`;
+  });
+  document.getElementById("perf-cards").innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════
+// REFRESH ALL
+// ═══════════════════════════════════════════════
+function refreshAll() {
+  renderSummary();
+  renderCatGrid();
+  renderOverviewTable();
+  renderRiskCards();
+  renderPerfCards();
+  // Re-init charts if on charts tab
+  if (document.getElementById("view-charts").classList.contains("active")) {
+    initCharts();
+  }
+}
+
+// ═══════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════
+function showTab(id) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("view-" + id).classList.add("active");
+  event.target.classList.add("active");
+  if (id === "charts") setTimeout(initCharts, 50);
+  if (id === "kpidata") renderEditTable();
+}
+
+
+// ═══════════════════════════════════════════════
+// ACCESS CONTROL
+// ═══════════════════════════════════════════════
+const ADMIN_HASH = "127560cfcf6098b9999de57dcbea7a75c82cdd302372ecff77069b31ed8bcf40";
+let isAdmin = false;
+
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function tryLogin() {
+  const val = document.getElementById("pwd-input").value;
+  const h = await sha256(val);
+  if (h === ADMIN_HASH) {
+    isAdmin = true;
+    document.getElementById("login-overlay").style.display = "none";
+    document.getElementById("admin-badge").style.display = "flex";
+    // Re-render edit table with editable fields enabled
+    renderEditTable();
+  } else {
+    const err = document.getElementById("login-error");
+    err.style.display = "block";
+    document.getElementById("pwd-input").value = "";
+    document.getElementById("pwd-input").focus();
+    setTimeout(() => err.style.display = "none", 3000);
+  }
+}
+
+function enterViewOnly() {
+  isAdmin = false;
+  document.getElementById("login-overlay").style.display = "none";
+  renderEditTable();
+}
+
+function logoutAdmin() {
+  if (confirm("Log out of admin mode?")) {
+    isAdmin = false;
+    document.getElementById("admin-badge").style.display = "none";
+    // Show login again
+    document.getElementById("login-overlay").style.display = "flex";
+    document.getElementById("pwd-input").value = "";
+  }
+}
+
+function showViewOnlyToast() {
+  if (isAdmin) return;
+  const t = document.getElementById("viewonly-toast");
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+renderSummary();
+renderCatGrid();
+renderOverviewTable();
+renderRiskCards();
+renderPerfCards();
+</script>
+</body>
+</html>
