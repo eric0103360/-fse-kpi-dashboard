@@ -778,7 +778,7 @@
   <div class="table-wrap">
     <div class="table-header-row">
       <div class="table-title">✏️ Live KPI Data Editor</div>
-      <span style="font-size:11px;color:var(--amber);" id="edit-tab-hint">⚡ Edit blue (2026) or grey (2025) cells — all views update instantly</span>
+      <span style="font-size:11px;color:var(--amber);" id="edit-tab-hint">⚡ Edit purple (Target), blue (2026) or grey (2025) cells — all views update instantly</span>
     </div>
     <div style="overflow-x:auto">
       <table class="kpi-table" id="edit-table">
@@ -787,7 +787,7 @@
             <th>#</th>
             <th>KPI / Indicator</th>
             <th class="hide-sm">Category</th>
-            <th>Target</th>
+            <th>Target <span class="edit-hint" style="color:#a5b4fc">✏ EDIT</span></th>
             <th>Dir</th>
             <th>2026 Current <span class="edit-hint">✏ EDIT</span></th>
             <th>2025 Previous <span class="edit-hint" style="color:var(--muted)">✏ EDIT</span></th>
@@ -1037,7 +1037,12 @@ function renderEditTable() {
       <td style="color:var(--muted)">${k.id}</td>
       <td class="kpi-name">${k.name}</td>
       <td class="hide-sm"><span class="kpi-cat-tag">${k.cat}</span></td>
-      <td class="val-target">${k.target}</td>
+      <td>
+        ${isAdmin
+          ? `<input type="number" class="editable-cell" style="background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.35);color:#a5b4fc;width:65px;" value="${k.target}" onchange="updateKPI(${idx},'target',this.value)" oninput="updateKPI(${idx},'target',this.value)">`
+          : `<span style="cursor:not-allowed" onclick="showViewOnlyToast()">${k.target}</span>`
+        }
+      </td>
       <td style="color:var(--muted);font-size:11px">${k.dir}</td>
       <td>${cell26}</td>
       <td>${cell25}</td>
