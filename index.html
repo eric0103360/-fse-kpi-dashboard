@@ -651,6 +651,72 @@
   }
   #viewonly-toast.show { opacity: 1; }
 
+
+  /* ── RISK EDIT FIELDS ── */
+  .risk-edit-field {
+    width: 100%; padding: 8px 10px;
+    background: var(--surface2); border: 1px dashed rgba(232,160,32,0.35);
+    border-radius: 6px; color: var(--text);
+    font-size: 12px; font-family: 'Inter', sans-serif;
+    resize: vertical; outline: none; line-height: 1.5;
+    transition: border-color 0.2s;
+  }
+  .risk-edit-field:focus { border-color: var(--accent); background: rgba(232,160,32,0.05); }
+
+  .risk-edit-input {
+    width: 100%; padding: 7px 10px;
+    background: var(--surface2); border: 1px dashed rgba(232,160,32,0.35);
+    border-radius: 6px; color: var(--text);
+    font-size: 12px; font-family: 'Inter', sans-serif;
+    outline: none; transition: border-color 0.2s;
+  }
+  .risk-edit-input:focus { border-color: var(--accent); background: rgba(232,160,32,0.05); }
+
+  .risk-edit-select {
+    width: 100%; padding: 7px 10px;
+    background: var(--surface2); border: 1px dashed rgba(232,160,32,0.35);
+    border-radius: 6px; color: var(--text);
+    font-size: 12px; font-family: 'Inter', sans-serif;
+    outline: none; cursor: pointer;
+  }
+
+  .action-status.in-progress { background: rgba(99,102,241,0.12); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.25); }
+  .action-status.escalated { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+
+  /* ── PRINT BUTTON ── */
+  .print-btn {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(232,160,32,0.1); border: 1px solid rgba(232,160,32,0.3);
+    border-radius: 8px; padding: 6px 14px;
+    font-family: 'Rajdhani', sans-serif; font-size: 13px;
+    font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--accent); cursor: pointer; transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .print-btn:hover { background: rgba(232,160,32,0.2); }
+
+  /* ── PRINT STYLES ── */
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    header { position: relative !important; box-shadow: none !important; }
+    .tabs { display: none !important; }
+    #login-overlay { display: none !important; }
+    #viewonly-toast { display: none !important; }
+    .print-btn { display: none !important; }
+    .filter-btns { display: none !important; }
+    .admin-badge { display: none !important; }
+    .live-badge { display: none !important; }
+    body { background: white !important; color: black !important; }
+    .view { display: block !important; page-break-after: always; }
+    .view:last-child { page-break-after: avoid; }
+    .sum-card, .chart-card, .risk-card, .table-wrap, .compliance-bar-wrap, .cat-card {
+      border: 1px solid #ccc !important;
+      box-shadow: none !important;
+    }
+    .risk-edit-field, .risk-edit-input, .risk-edit-select { border: 1px solid #ccc !important; }
+    canvas { max-width: 100% !important; }
+  }
+
 </style>
 </head>
 <body>
@@ -689,6 +755,8 @@
   <div class="header-right">
     <div class="live-badge"><div class="live-dot"></div>Live</div>
     <div class="year-badge">2026 vs 2025</div>
+    <button class="print-btn" onclick="printView()" title="Print current tab">🖨️ Print View</button>
+    <button class="print-btn" onclick="printAll()" title="Print full report">📄 Full Report</button>
 
     <div class="admin-badge" id="admin-badge" onclick="logoutAdmin()" title="Click to logout">⚙ Admin</div>
   </div>
@@ -871,12 +939,24 @@ const KPIs = [
 ];
 
 const RISK_ACTIONS = [
+  { id:1,  action:"Investigate root cause; implement corrective action; monitor progress.", responsible:"Management", timeframe:"30 Days", actionStatus:"Closed" },
+  { id:2,  action:"Investigate root cause; implement corrective action; monitor progress.", responsible:"Management", timeframe:"30 Days", actionStatus:"Open" },
+  { id:3,  action:"Investigate root cause; implement corrective action; monitor progress.", responsible:"Management", timeframe:"30 Days", actionStatus:"Open" },
+  { id:4,  action:"Review all open NCRs; assign owners; set closure deadlines; escalate aged NCRs.", responsible:"Quality Manager", timeframe:"30 Days", actionStatus:"Open" },
+  { id:5,  action:"Engage late suppliers; review lead times; identify backup suppliers for critical materials.", responsible:"Procurement Manager", timeframe:"30 Days", actionStatus:"Open" },
   { id:6,  action:"Identify out-of-qualification welders; schedule qualification tests; update training plan.", responsible:"HR / Workshop Supervisor", timeframe:"60 Days", actionStatus:"Open" },
   { id:7,  action:"Root cause analysis on all repairs; re-test affected welders; increase weld inspection frequency.", responsible:"QC / Workshop Supervisor", timeframe:"Immediate", actionStatus:"Open" },
   { id:8,  action:"Identify missing WPS documents; engage welding engineer to draft outstanding procedures.", responsible:"Quality Manager", timeframe:"30 Days", actionStatus:"Open" },
+  { id:9,  action:"Monitor closely; any increase triggers immediate corrective action; review inspection frequency.", responsible:"QC Manager", timeframe:"Monthly", actionStatus:"Open" },
   { id:10, action:"Review waste stream data; identify high-waste fabrication processes; implement lean practices.", responsible:"Operations Manager", timeframe:"Quarterly", actionStatus:"Open" },
   { id:11, action:"Conduct energy audit; identify high-consumption equipment; implement switch-off protocols.", responsible:"Operations / HSE", timeframe:"Quarterly", actionStatus:"Open" },
+  { id:12, action:"Investigate root cause; implement corrective action; monitor progress.", responsible:"Management", timeframe:"30 Days", actionStatus:"Open" },
+  { id:13, action:"Investigate root cause; implement corrective action; monitor progress.", responsible:"Management", timeframe:"30 Days", actionStatus:"Open" },
+  { id:14, action:"Investigate root cause; implement corrective action; monitor progress.", responsible:"Management", timeframe:"30 Days", actionStatus:"Open" },
+  { id:15, action:"Investigate all LTIs; review and update HIRA; implement corrective actions; brief all staff.", responsible:"HSE Manager / CEO", timeframe:"Immediate", actionStatus:"Open" },
   { id:16, action:"Investigate root cause of near-miss under-reporting; implement toolbox talks and reporting culture drive.", responsible:"Management", timeframe:"30 Days", actionStatus:"Open" },
+  { id:17, action:"Investigate root cause; implement corrective action; monitor progress.", responsible:"Management", timeframe:"30 Days", actionStatus:"Open" },
+  { id:18, action:"Investigate root cause; implement corrective action; monitor progress.", responsible:"Management", timeframe:"30 Days", actionStatus:"Open" },
 ];
 
 // ═══════════════════════════════════════════════
@@ -1165,34 +1245,76 @@ function initCharts() {
 // RENDER RISK CARDS
 // ═══════════════════════════════════════════════
 function renderRiskCards() {
-  const attn = KPIs.filter(k => getStatus(k) !== "on");
   const s = computeStats();
   document.getElementById("risk-count").textContent = `${s.risk + s.crit} of 18`;
-
   let html = "";
-  KPIs.forEach(k => {
+  KPIs.forEach((k, idx) => {
     const st = getStatus(k);
     const ra = RISK_ACTIONS.find(r => r.id === k.id);
     const cls = st === "crit" ? "crit" : st === "risk" ? "risk" : "good";
     const action = ra ? ra.action : "Investigate root cause; implement corrective action; monitor progress.";
     const responsible = ra ? ra.responsible : "Management";
     const timeframe = ra ? ra.timeframe : "30 Days";
-    const aStatus = ra ? ra.actionStatus : (k.id === 1 ? "Closed" : "Open");
-    html += `<div class="risk-card ${cls}">
-      <div class="risk-kpi-name">${k.name}</div>
-      <div class="risk-meta">
-        <span class="kpi-cat-tag">${k.cat}</span>&nbsp;
-        ${badgeHTML(st)}&nbsp;
-        <span style="color:var(--muted)">Current: ${k.v26} | Target: ${k.target}</span>
-      </div>
-      <div class="risk-action">📋 ${action}</div>
-      <div class="risk-footer">
-        <span>👤 ${responsible} &nbsp;·&nbsp; ⏱ ${timeframe}</span>
-        <span class="action-status ${aStatus.toLowerCase()}">${aStatus}</span>
-      </div>
-    </div>`;
+    const aStatus = ra ? ra.actionStatus : "Open";
+    const raIdx = RISK_ACTIONS.findIndex(r => r.id === k.id);
+
+    if (isAdmin) {
+      html += `<div class="risk-card ${cls}">
+        <div class="risk-kpi-name">${k.name} <span style="font-size:10px;color:var(--accent);letter-spacing:1px">✏ ADMIN EDIT</span></div>
+        <div class="risk-meta">
+          <span class="kpi-cat-tag">${k.cat}</span>&nbsp;
+          ${badgeHTML(st)}&nbsp;
+          <span style="color:var(--muted)">Current: ${k.v26} | Target: ${k.target}</span>
+        </div>
+        <div style="margin-bottom:8px">
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">📋 Management Action</div>
+          <textarea class="risk-edit-field" rows="2" onchange="updateRiskAction(${k.id},'action',this.value)">${action}</textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <div>
+            <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">👤 Responsible</div>
+            <input type="text" class="risk-edit-input" value="${responsible}" onchange="updateRiskAction(${k.id},'responsible',this.value)">
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">⏱ Timeframe</div>
+            <input type="text" class="risk-edit-input" value="${timeframe}" onchange="updateRiskAction(${k.id},'timeframe',this.value)">
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Action Status</div>
+          <select class="risk-edit-select" onchange="updateRiskAction(${k.id},'actionStatus',this.value)">
+            <option value="Open" ${aStatus==='Open'?'selected':''}>Open</option>
+            <option value="Closed" ${aStatus==='Closed'?'selected':''}>Closed</option>
+            <option value="In Progress" ${aStatus==='In Progress'?'selected':''}>In Progress</option>
+            <option value="Escalated" ${aStatus==='Escalated'?'selected':''}>Escalated</option>
+          </select>
+        </div>
+      </div>`;
+    } else {
+      html += `<div class="risk-card ${cls}">
+        <div class="risk-kpi-name">${k.name}</div>
+        <div class="risk-meta">
+          <span class="kpi-cat-tag">${k.cat}</span>&nbsp;
+          ${badgeHTML(st)}&nbsp;
+          <span style="color:var(--muted)">Current: ${k.v26} | Target: ${k.target}</span>
+        </div>
+        <div class="risk-action">📋 ${action}</div>
+        <div class="risk-footer">
+          <span>👤 ${responsible} &nbsp;·&nbsp; ⏱ ${timeframe}</span>
+          <span class="action-status ${aStatus.toLowerCase().replace(' ','-')}">${aStatus}</span>
+        </div>
+      </div>`;
+    }
   });
   document.getElementById("risk-cards").innerHTML = html;
+}
+
+function updateRiskAction(id, field, val) {
+  const ra = RISK_ACTIONS.find(r => r.id === id);
+  if (ra) ra[field] = val;
+  // re-render risk count badge only, not full re-render to preserve focus
+  const s = computeStats();
+  document.getElementById("risk-count").textContent = `${s.risk + s.crit} of 18`;
 }
 
 // ═══════════════════════════════════════════════
@@ -1320,6 +1442,43 @@ function showViewOnlyToast() {
   const t = document.getElementById("viewonly-toast");
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 2800);
+}
+
+
+// ═══════════════════════════════════════════════
+// PRINT FUNCTIONS
+// ═══════════════════════════════════════════════
+function printView() {
+  // Only print the active view
+  document.querySelectorAll(".view").forEach(v => {
+    if (!v.classList.contains("active")) v.style.display = "none";
+  });
+  window.print();
+  document.querySelectorAll(".view").forEach(v => {
+    v.style.display = "";
+    if (v.classList.contains("active")) v.style.display = "block";
+  });
+}
+
+function printAll() {
+  // Show all views for full report print
+  document.querySelectorAll(".view").forEach(v => v.style.display = "block");
+  // Init charts if not already done
+  setTimeout(() => {
+    initCharts();
+    setTimeout(() => {
+      window.print();
+      // Restore normal view
+      document.querySelectorAll(".view").forEach(v => {
+        v.style.display = "none";
+        v.classList.remove("active");
+      });
+      document.getElementById("view-overview").style.display = "block";
+      document.getElementById("view-overview").classList.add("active");
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".tab")[0].classList.add("active");
+    }, 500);
+  }, 100);
 }
 
 // ═══════════════════════════════════════════════
