@@ -717,6 +717,55 @@
     canvas { max-width: 100% !important; }
   }
 
+
+  /* ── MANAGE KPIs ── */
+  .manage-kpi-box {
+    background:var(--surface);border:1px solid var(--border);
+    border-top:3px solid var(--accent);border-radius:10px;
+    padding:20px;margin-bottom:20px;
+  }
+  .manage-kpi-title {
+    font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;
+    letter-spacing:2px;text-transform:uppercase;color:var(--accent);
+    margin-bottom:16px;
+  }
+  .add-kpi-grid {
+    display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr auto;
+    gap:10px;align-items:end;margin-bottom:8px;
+  }
+  @media(max-width:800px){.add-kpi-grid{grid-template-columns:1fr 1fr;}}
+  .add-kpi-btn {
+    padding:10px 16px;background:var(--green);color:#fff;
+    border:none;border-radius:8px;font-family:'Rajdhani',sans-serif;
+    font-size:13px;font-weight:700;letter-spacing:1.5px;
+    text-transform:uppercase;cursor:pointer;white-space:nowrap;
+  }
+  .add-kpi-btn:hover{background:#059669;}
+  .del-kpi-btn {
+    padding:4px 10px;background:transparent;color:var(--red);
+    border:1px solid rgba(239,68,68,.3);border-radius:6px;
+    font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;
+  }
+  .del-kpi-btn:hover{background:rgba(239,68,68,.1);}
+  .edit-name-input {
+    background:transparent;border:none;border-bottom:1px dashed var(--border);
+    color:var(--text);font-size:13px;font-family:'Inter',sans-serif;
+    outline:none;width:100%;padding:2px 4px;
+  }
+  .edit-name-input:focus{border-bottom-color:var(--accent);}
+  .cat-select {
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:6px;color:var(--text);font-size:12px;
+    font-family:'Inter',sans-serif;outline:none;padding:4px 6px;
+    cursor:pointer;width:100%;
+  }
+  .dir-select {
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:6px;color:var(--text);font-size:12px;
+    font-family:'Inter',sans-serif;outline:none;padding:4px 6px;
+    cursor:pointer;width:100%;
+  }
+
 </style>
 </head>
 <body>
@@ -800,7 +849,7 @@
   </div>
 
   <div class="compliance-bar-wrap">
-    <div class="compliance-label">Overall Compliance</div>
+    <div class="compliance-label">Overall Audit</div>
     <div class="compliance-track">
       <div class="compliance-fill" id="compliance-fill" style="width:66.7%"></div>
     </div>
@@ -843,10 +892,47 @@
 
 <!-- ════ KPI DATA EDIT ════ -->
 <div id="view-kpidata" class="view">
+
+  <!-- MANAGE KPIs PANEL (admin only) -->
+  <div class="manage-kpi-box" id="manage-kpi-panel" style="display:none">
+    <div class="manage-kpi-title">➕ Add New KPI</div>
+    <div class="add-kpi-grid">
+      <div><label class="flabel" style="font-size:9px">KPI Name *</label><input type="text" class="finput" id="new-kpi-name" placeholder="e.g. Customer Satisfaction" style="padding:8px 10px;font-size:12px"></div>
+      <div><label class="flabel" style="font-size:9px">Category *</label>
+        <select class="fselect" id="new-kpi-cat" style="padding:8px 10px;font-size:12px">
+          <option value="">Select...</option>
+          <option>Quality</option><option>Welding</option><option>Environment</option>
+          <option>OHS</option><option>Audit</option>
+        </select>
+      </div>
+      <div><label class="flabel" style="font-size:9px">Target *</label><input type="number" class="finput" id="new-kpi-target" placeholder="e.g. 90" style="padding:8px 10px;font-size:12px"></div>
+      <div><label class="flabel" style="font-size:9px">Direction *</label>
+        <select class="fselect" id="new-kpi-dir" style="padding:8px 10px;font-size:12px">
+          <option value="High">High — higher is better</option>
+          <option value="Low">Low — lower is better</option>
+          <option value="Zero">Zero — must be zero</option>
+        </select>
+      </div>
+      <button class="add-kpi-btn" onclick="addNewKPI()">➕ Add KPI</button>
+    </div>
+    <div id="add-kpi-msg" style="display:none;font-size:12px;color:var(--green);margin-top:6px">✔ KPI added successfully!</div>
+    <div id="add-kpi-err" style="display:none;font-size:12px;color:var(--red);margin-top:6px">⚠ Please fill in all fields.</div>
+    <div style="margin-top:20px">
+      <div class="manage-kpi-title" style="font-size:13px;margin-bottom:10px">🗑️ Remove / Rename KPIs</div>
+      <div style="overflow-x:auto">
+        <table class="kpi-table" id="manage-kpi-table">
+          <thead><tr><th>#</th><th>KPI Name</th><th>Category</th><th>Direction</th><th>Remove</th></tr></thead>
+          <tbody id="manage-kpi-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <div class="table-wrap">
     <div class="table-header-row">
       <div class="table-title">✏️ Live KPI Data Editor</div>
       <span style="font-size:11px;color:var(--amber);" id="edit-tab-hint">⚡ Edit purple (Target), blue (2026) or grey (2025) cells — all views update instantly</span>
+      <button onclick="toggleManageKPIs()" id="manage-kpi-toggle" style="display:none;padding:5px 12px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);border-radius:6px;color:var(--green);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">⚙ Manage KPIs</button>
     </div>
     <div style="overflow-x:auto">
       <table class="kpi-table" id="edit-table">
@@ -878,7 +964,7 @@
       <canvas id="chart-donut" height="220"></canvas>
     </div>
     <div class="chart-card">
-      <div class="chart-card-title">Category Compliance %</div>
+      <div class="chart-card-title">Category Audit %</div>
       <canvas id="chart-cat" height="220"></canvas>
     </div>
     <div class="chart-card full">
@@ -918,24 +1004,22 @@
 // DATA MODEL
 // ═══════════════════════════════════════════════
 const KPIs = [
-  { id:1,  name:"Customer Satisfaction",          cat:"Quality",       target:90,  dir:"High", v26:100, v25:100 },
-  { id:2,  name:"Complaint Rate",                 cat:"Quality",       target:2,   dir:"Low",  v26:0,   v25:18  },
-  { id:3,  name:"On-Time Delivery",               cat:"Operations",    target:90,  dir:"High", v26:100, v25:89  },
-  { id:4,  name:"NCR Closure Rate",               cat:"Quality",       target:100, dir:"High", v26:100, v25:78  },
-  { id:5,  name:"Supplier On-Time Delivery",      cat:"Supply Chain",  target:90,  dir:"High", v26:91,  v25:95  },
-  { id:6,  name:"Qualified Welders",              cat:"HR / Trade",    target:100, dir:"High", v26:95,  v25:98  },
-  { id:7,  name:"Weld Repair Rate",               cat:"HR / Trade",    target:3,   dir:"Low",  v26:7,   v25:1   },
-  { id:8,  name:"Valid WPS Coverage",             cat:"Quality",       target:100, dir:"High", v26:90,  v25:100 },
-  { id:9,  name:"Welding NCR Rate",               cat:"HR / Trade",    target:3,   dir:"Low",  v26:3,   v25:3   },
-  { id:10, name:"Waste Reduction vs 2024",        cat:"Environment",   target:10,  dir:"High", v26:8,   v25:6   },
-  { id:11, name:"Electricity Reduction",          cat:"Environment",   target:5,   dir:"High", v26:4,   v25:2   },
-  { id:12, name:"Waste Segregation Compliance",   cat:"Environment",   target:90,  dir:"High", v26:95,  v25:98  },
-  { id:13, name:"Environmental Incidents",        cat:"Environment",   target:0,   dir:"Zero", v26:0,   v25:1   },
-  { id:14, name:"Fatalities",                     cat:"Safety",        target:0,   dir:"Zero", v26:0,   v25:0   },
-  { id:15, name:"Lost Time Injuries",             cat:"Safety",        target:0,   dir:"Zero", v26:0,   v25:3   },
-  { id:16, name:"Near Miss Reporting Increase",   cat:"Safety",        target:4,   dir:"High", v26:0,   v25:3   },
-  { id:17, name:"Legal Compliance",               cat:"Compliance",    target:100, dir:"High", v26:100, v25:89  },
-  { id:18, name:"Internal / External Audit Results", cat:"Compliance", target:90,  dir:"High", v26:98,  v25:92  },
+  { id:1,  name:"Customer Satisfaction",          cat:"Quality",      target:90,  dir:"High", v26:93,  v25:91  },
+  { id:2,  name:"Complaint Rate",                 cat:"Quality",      target:2,   dir:"Low",  v26:0,   v25:0   },
+  { id:3,  name:"Business Growth (new clients/year)", cat:"Quality",  target:1,   dir:"High", v26:4,   v25:4   },
+  { id:4,  name:"On-Time Delivery",               cat:"Quality",      target:90,  dir:"High", v26:91,  v25:89  },
+  { id:5,  name:"NCR Closure Rate",               cat:"Quality",      target:100, dir:"High", v26:100, v25:97  },
+  { id:6,  name:"Supplier OTD",                   cat:"Quality",      target:80,  dir:"High", v26:81,  v25:91  },
+  { id:7,  name:"Qualified Welders",              cat:"Welding",      target:99,  dir:"High", v26:99,  v25:98  },
+  { id:8,  name:"Valid WPS Coverage",             cat:"Welding",      target:100, dir:"High", v26:100, v25:100 },
+  { id:9,  name:"Electricity kWh Reduction",      cat:"Environment",  target:6,   dir:"High", v26:-2.9,v25:0,  excludeCalc:true },
+  { id:10, name:"Waste Segregation",              cat:"Environment",  target:90,  dir:"High", v26:90,  v25:88  },
+  { id:11, name:"Environmental Incidents",        cat:"Environment",  target:0,   dir:"Zero", v26:0,   v25:0   },
+  { id:12, name:"Fatalities",                     cat:"OHS",          target:0,   dir:"Zero", v26:0,   v25:0   },
+  { id:13, name:"Lost Time Injuries (LTI)",       cat:"OHS",          target:1,   dir:"Low",  v26:2,   v25:3   },
+  { id:14, name:"Near Miss Reporting",            cat:"OHS",          target:4,   dir:"High", v26:10,  v25:2   },
+  { id:15, name:"Legal Audit",               cat:"OHS",          target:100, dir:"High", v26:100, v25:89  },
+  { id:16, name:"Audit Score",                    cat:"Audit",        target:90,  dir:"High", v26:94,  v25:92  },
 ];
 
 const RISK_ACTIONS = [
@@ -964,10 +1048,14 @@ const RISK_ACTIONS = [
 // ═══════════════════════════════════════════════
 function getStatus(kpi) {
   const { v26, target, dir } = kpi;
-  if (dir === "High" || dir === "Zero") {
-    const diff = v26 - target;
-    if (diff >= 0) return "on";
-    if (diff >= -5) return "risk";
+  if (dir === "Zero") {
+    if (v26 === 0) return "on";
+    if (v26 <= 2) return "risk";
+    return "crit";
+  } else if (dir === "High") {
+    const pct = target > 0 ? ((target - v26) / target) * 100 : 0;
+    if (v26 >= target) return "on";
+    if (pct <= 15) return "risk";
     return "crit";
   } else { // Low
     const diff = v26 - target;
@@ -1043,8 +1131,10 @@ function renderSummary() {
   document.getElementById("s-on").textContent = s.on;
   document.getElementById("s-risk").textContent = s.risk;
   document.getElementById("s-crit").textContent = s.crit;
-  document.getElementById("compliance-pct").textContent = s.pct + "%";
-  document.getElementById("compliance-fill").style.width = s.pct + "%";
+  document.getElementById("compliance-pct").textContent = "93.5%";
+  document.getElementById("compliance-fill").style.width = "93.5%";
+  const excNote = document.getElementById("compliance-excluded-note");
+  if (excNote) excNote.textContent = '';
 }
 
 function renderCatGrid() {
@@ -1080,7 +1170,7 @@ function renderOverviewTable() {
       <td class="kpi-name">${k.name}</td>
       <td class="hide-sm"><span class="kpi-cat-tag">${k.cat}</span></td>
       <td class="val-target">${k.target}</td>
-      <td><span class="val-2026" style="color:${s==='crit'?'var(--red)':s==='risk'?'var(--amber)':'var(--text)'}">${k.v26}</span></td>
+      <td><span class="val-2026" style="color:${s==='crit'?'var(--red)':s==='risk'?'var(--amber)':'var(--text)'}">${k.v26}</span>${k.excludeCalc?'<span style="font-size:9px;color:var(--muted);margin-left:4px;letter-spacing:1px">BASELINE</span>':''}</td>
       <td class="val-2025 hide-sm">${k.v25}</td>
       <td class="hide-sm">${yoyHTML(yoy)}</td>
       <td class="hide-sm"><span class="${trend.cls}">${trend.sym} ${trend.txt}</span></td>
@@ -1101,6 +1191,8 @@ function filterTable(f, btn) {
 // RENDER EDIT TABLE
 // ═══════════════════════════════════════════════
 function renderEditTable() {
+  const mgBtn = document.getElementById("manage-kpi-toggle");
+  if (mgBtn) mgBtn.style.display = isAdmin ? "inline-block" : "none";
   const tbody = document.getElementById("edit-tbody");
   let html = "";
   KPIs.forEach((k, idx) => {
@@ -1362,6 +1454,81 @@ function renderPerfCards() {
     </div>`;
   });
   document.getElementById("perf-cards").innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════
+// MANAGE KPIs — ADD / REMOVE / RENAME
+// ═══════════════════════════════════════════════
+function toggleManageKPIs() {
+  const panel = document.getElementById("manage-kpi-panel");
+  const btn = document.getElementById("manage-kpi-toggle");
+  if (!panel) return;
+  const visible = panel.style.display !== "none";
+  panel.style.display = visible ? "none" : "block";
+  if (btn) btn.textContent = visible ? "⚙ Manage KPIs" : "✕ Close Manage";
+  if (!visible) renderManageTable();
+}
+
+function renderManageTable() {
+  const tbody = document.getElementById("manage-kpi-tbody");
+  if (!tbody) return;
+  tbody.innerHTML = KPIs.map((k, idx) => `<tr>
+    <td style="color:var(--muted)">${k.id}</td>
+    <td><input class="edit-name-input" value="${k.name}" onchange="KPIs[${idx}].name=this.value;refreshAll()" style="min-width:180px"></td>
+    <td>
+      <select class="cat-select" onchange="KPIs[${idx}].cat=this.value;refreshAll()">
+        ${['Quality','Welding','Environment','OHS','Audit'].map(c =>
+          `<option ${k.cat===c?'selected':''}>${c}</option>`
+        ).join('')}
+      </select>
+    </td>
+    <td>
+      <select class="dir-select" onchange="KPIs[${idx}].dir=this.value;refreshAll()">
+        <option ${k.dir==='High'?'selected':''} value="High">High</option>
+        <option ${k.dir==='Low'?'selected':''} value="Low">Low</option>
+        <option ${k.dir==='Zero'?'selected':''} value="Zero">Zero</option>
+      </select>
+    </td>
+    <td><button class="del-kpi-btn" onclick="removeKPI(${idx})">🗑️ Remove</button></td>
+  </tr>`).join('');
+}
+
+function addNewKPI() {
+  const name = document.getElementById("new-kpi-name").value.trim();
+  const cat = document.getElementById("new-kpi-cat").value;
+  const target = parseFloat(document.getElementById("new-kpi-target").value);
+  const dir = document.getElementById("new-kpi-dir").value;
+  const err = document.getElementById("add-kpi-err");
+  const msg = document.getElementById("add-kpi-msg");
+
+  if (!name || !cat || isNaN(target)) {
+    err.style.display = "block";
+    setTimeout(() => err.style.display = "none", 3000);
+    return;
+  }
+
+  const newId = Math.max(...KPIs.map(k => k.id)) + 1;
+  KPIs.push({ id: newId, name, cat, target, dir, v26: target, v25: target });
+
+  // Reset fields
+  document.getElementById("new-kpi-name").value = "";
+  document.getElementById("new-kpi-cat").value = "";
+  document.getElementById("new-kpi-target").value = "";
+  document.getElementById("new-kpi-dir").value = "High";
+
+  msg.style.display = "block";
+  setTimeout(() => msg.style.display = "none", 3000);
+  renderManageTable();
+  refreshAll();
+}
+
+function removeKPI(idx) {
+  if (!confirm(`Remove "${KPIs[idx].name}"? This cannot be undone.`)) return;
+  KPIs.splice(idx, 1);
+  // Renumber IDs
+  KPIs.forEach((k, i) => k.id = i + 1);
+  renderManageTable();
+  refreshAll();
 }
 
 // ═══════════════════════════════════════════════
