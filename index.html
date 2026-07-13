@@ -807,6 +807,8 @@
     <button class="print-btn" onclick="printView()" title="Print current tab">🖨️ Print View</button>
     <button class="print-btn" onclick="printAll()" title="Print full report">📄 Full Report</button>
 
+    <button class="print-btn" id="save-github-btn" onclick="saveToGitHub()" style="display:none;border-color:rgba(16,185,129,.45);color:#10b981;" title="Save KPI data to GitHub">💾 Save</button>
+
     <div class="admin-badge" id="admin-badge" onclick="logoutAdmin()" title="Click to logout">⚙ Admin</div>
   </div>
 </header>
@@ -1003,7 +1005,7 @@
 // ═══════════════════════════════════════════════
 // DATA MODEL
 // ═══════════════════════════════════════════════
-const KPIs = [
+let KPIs = [
   { id:1,  name:"Customer Satisfaction",          cat:"Quality",      target:90,  dir:"High", v26:93,  v25:91  },
   { id:2,  name:"Complaint Rate",                 cat:"Quality",      target:2,   dir:"Low",  v26:0,   v25:0   },
   { id:3,  name:"Business Growth (new clients/year)", cat:"Quality",  target:1,   dir:"High", v26:4,   v25:4   },
@@ -1022,7 +1024,7 @@ const KPIs = [
   { id:16, name:"Audit Score",                    cat:"Audit",        target:90,  dir:"High", v26:94,  v25:92  },
 ];
 
-const RISK_ACTIONS = [
+let RISK_ACTIONS = [
   { id:1,  action:"Investigate root cause; implement corrective action; monitor progress.", responsible:"Management", timeframe:"30 Days", actionStatus:"Closed" },
   { id:2,  action:"Investigate root cause; implement corrective action; monitor progress.", responsible:"Management", timeframe:"30 Days", actionStatus:"Open" },
   { id:3,  action:"Investigate root cause; implement corrective action; monitor progress.", responsible:"Management", timeframe:"30 Days", actionStatus:"Open" },
@@ -1577,6 +1579,7 @@ async function tryLogin() {
     isAdmin = true;
     document.getElementById("login-overlay").style.display = "none";
     document.getElementById("admin-badge").style.display = "flex";
+    document.getElementById("save-github-btn").style.display = "inline-block";
     // Re-render edit table with editable fields enabled
     renderEditTable();
   } else {
@@ -1598,6 +1601,7 @@ function logoutAdmin() {
   if (confirm("Log out of admin mode?")) {
     isAdmin = false;
     document.getElementById("admin-badge").style.display = "none";
+    document.getElementById("save-github-btn").style.display = "none";
     // Show login again
     document.getElementById("login-overlay").style.display = "flex";
     document.getElementById("pwd-input").value = "";
@@ -1649,6 +1653,104 @@ function printAll() {
 }
 
 // ═══════════════════════════════════════════════
+// GITHUB DATA SYNC (no external backend)
+// KPI data is stored as kpi-data.json committed
+// into this same GitHub repository.
+// ═══════════════════════════════════════════════
+const GH = { owner: "eric0103360", repo: "-fse-kpi-dashboard", path: "kpi-data.json", branch: "main" };
+
+function ghToast(msg, ok = true) {
+  let t = document.getElementById("gh-toast");
+  if (!t) {
+    t = document.createElement("div");
+    t.id = "gh-toast";
+    t.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 22px;border-radius:8px;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:.5px;z-index:9999;transition:opacity .4s;box-shadow:0 6px 20px rgba(0,0,0,.45);";
+    document.body.appendChild(t);
+  }
+  t.style.background = ok ? "rgba(16,185,129,.95)" : "rgba(239,68,68,.95)";
+  t.style.color = "#fff";
+  t.textContent = msg;
+  t.style.opacity = "1";
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.style.opacity = "0", 4000);
+}
+
+function applySavedData(data) {
+  if (Array.isArray(data.KPIs) && data.KPIs.length) KPIs = data.KPIs;
+  if (Array.isArray(data.RISK_ACTIONS) && data.RISK_ACTIONS.length) RISK_ACTIONS = data.RISK_ACTIONS;
+  refreshAll();
+  renderEditTable();
+}
+
+async function loadFromGitHub() {
+  // 1) Preferred: load kpi-data.json straight from this GitHub Pages site
+  //    (same origin -- no API, no rate limits)
+  try {
+    const r = await fetch(GH.path + "?t=" + Date.now(), { cache: "no-store" });
+    if (r.ok) { applySavedData(await r.json()); return; }
+    // 404 = no data saved yet; built-in defaults are used
+    if (r.status === 404) return;
+  } catch (e) { /* fall through to API */ }
+  // 2) Fallback: GitHub API (can be rate-limited on shared networks)
+  try {
+    const r = await fetch(
+      "https://api.github.com/repos/" + GH.owner + "/" + GH.repo + "/contents/" + GH.path + "?ref=" + GH.branch + "&t=" + Date.now(),
+      { headers: { "Accept": "application/vnd.github.raw" }, cache: "no-store" }
+    );
+    if (r.ok) applySavedData(await r.json());
+  } catch (e) {
+    // No saved data reachable -- dashboard continues with built-in defaults
+  }
+}
+
+function getGhToken(forceNew = false) {
+  let t = forceNew ? null : localStorage.getItem("fse_kpi_gh_token");
+  if (!t) {
+    t = prompt("Paste your GitHub Personal Access Token.\n(Fine-grained token with Contents: Read & Write on the -fse-kpi-dashboard repo.)\nIt is stored only in this browser.");
+    if (t) localStorage.setItem("fse_kpi_gh_token", t.trim());
+  }
+  return t ? t.trim() : null;
+}
+
+async function saveToGitHub(retry = false) {
+  if (!isAdmin) { showViewOnlyToast(); return; }
+  const token = getGhToken(retry);
+  if (!token) { ghToast("Save cancelled -- no token entered", false); return; }
+  const btn = document.getElementById("save-github-btn");
+  btn.disabled = true; btn.textContent = "Saving...";
+  try {
+    const api = "https://api.github.com/repos/" + GH.owner + "/" + GH.repo + "/contents/" + GH.path;
+    const headers = { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json" };
+    // Get current file SHA if it already exists
+    let sha = null;
+    const g = await fetch(api + "?ref=" + GH.branch + "&t=" + Date.now(), { headers, cache: "no-store" });
+    if (g.status === 200) { sha = (await g.json()).sha; }
+    else if (g.status === 401 || g.status === 403) { throw { auth: true }; }
+    const payload = { savedAt: new Date().toLocaleString("en-ZA"), KPIs: KPIs, RISK_ACTIONS: RISK_ACTIONS };
+    const body = {
+      message: "Update KPI data -- " + payload.savedAt,
+      branch: GH.branch,
+      content: btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))))
+    };
+    if (sha) body.sha = sha;
+    const p = await fetch(api, { method: "PUT", headers: headers, body: JSON.stringify(body) });
+    if (p.status === 401 || p.status === 403) throw { auth: true };
+    if (!p.ok) throw new Error("GitHub returned " + p.status);
+    ghToast("Saved to GitHub -- data now visible to everyone");
+  } catch (e) {
+    btn.disabled = false; btn.textContent = "\uD83D\uDCBE Save";
+    if (e && e.auth && !retry) {
+      localStorage.removeItem("fse_kpi_gh_token");
+      ghToast("Token rejected -- please enter a new one", false);
+      return saveToGitHub(true);
+    }
+    ghToast("Save failed -- " + (e.message || "check connection or token"), false);
+    return;
+  }
+  btn.disabled = false; btn.textContent = "\uD83D\uDCBE Save";
+}
+
+// ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
 renderSummary();
@@ -1656,6 +1758,7 @@ renderCatGrid();
 renderOverviewTable();
 renderRiskCards();
 renderPerfCards();
+loadFromGitHub();
 </script>
 </body>
 </html>
