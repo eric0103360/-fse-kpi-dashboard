@@ -1,0 +1,278 @@
+{
+  "savedAt": "2026/07/13, 12:29:33",
+  "KPIs": [
+    {
+      "id": 1,
+      "name": "Customer Satisfaction",
+      "cat": "Quality",
+      "target": 90,
+      "dir": "High",
+      "v26": 93,
+      "v25": 91
+    },
+    {
+      "id": 2,
+      "name": "Complaint Rate",
+      "cat": "Quality",
+      "target": 2,
+      "dir": "Low",
+      "v26": 0,
+      "v25": 0
+    },
+    {
+      "id": 3,
+      "name": "Business Growth (new clients/year)",
+      "cat": "Quality",
+      "target": 1,
+      "dir": "High",
+      "v26": 4,
+      "v25": 4
+    },
+    {
+      "id": 4,
+      "name": "On-Time Delivery",
+      "cat": "Quality",
+      "target": 90,
+      "dir": "High",
+      "v26": 91,
+      "v25": 89
+    },
+    {
+      "id": 5,
+      "name": "NCR Closure Rate",
+      "cat": "Quality",
+      "target": 100,
+      "dir": "High",
+      "v26": 100,
+      "v25": 97
+    },
+    {
+      "id": 6,
+      "name": "Supplier OTD",
+      "cat": "Quality",
+      "target": 80,
+      "dir": "High",
+      "v26": 81,
+      "v25": 91
+    },
+    {
+      "id": 7,
+      "name": "Qualified Welders",
+      "cat": "Welding",
+      "target": 99,
+      "dir": "High",
+      "v26": 99,
+      "v25": 98
+    },
+    {
+      "id": 8,
+      "name": "Valid WPS Coverage",
+      "cat": "Welding",
+      "target": 100,
+      "dir": "High",
+      "v26": 100,
+      "v25": 100
+    },
+    {
+      "id": 9,
+      "name": "Electricity kWh Reduction",
+      "cat": "Environment",
+      "target": 6,
+      "dir": "High",
+      "v26": -2.9,
+      "v25": 0,
+      "excludeCalc": true
+    },
+    {
+      "id": 10,
+      "name": "Waste Segregation",
+      "cat": "Environment",
+      "target": 90,
+      "dir": "High",
+      "v26": 90,
+      "v25": 88
+    },
+    {
+      "id": 11,
+      "name": "Environmental Incidents",
+      "cat": "Environment",
+      "target": 0,
+      "dir": "Zero",
+      "v26": 0,
+      "v25": 0
+    },
+    {
+      "id": 12,
+      "name": "Fatalities",
+      "cat": "OHS",
+      "target": 0,
+      "dir": "Zero",
+      "v26": 0,
+      "v25": 0
+    },
+    {
+      "id": 13,
+      "name": "Lost Time Injuries (LTI)",
+      "cat": "OHS",
+      "target": 1,
+      "dir": "Low",
+      "v26": 2,
+      "v25": 3
+    },
+    {
+      "id": 14,
+      "name": "Near Miss Reporting",
+      "cat": "OHS",
+      "target": 4,
+      "dir": "High",
+      "v26": 10,
+      "v25": 2
+    },
+    {
+      "id": 15,
+      "name": "Legal Audit",
+      "cat": "OHS",
+      "target": 100,
+      "dir": "High",
+      "v26": 100,
+      "v25": 89
+    },
+    {
+      "id": 16,
+      "name": "Audit Score",
+      "cat": "Audit",
+      "target": 90,
+      "dir": "High",
+      "v26": 94,
+      "v25": 92
+    }
+  ],
+  "RISK_ACTIONS": [
+    {
+      "id": 1,
+      "action": "Investigate root cause; implement corrective action; monitor progress.",
+      "responsible": "Management",
+      "timeframe": "30 Days",
+      "actionStatus": "Closed"
+    },
+    {
+      "id": 2,
+      "action": "Investigate root cause; implement corrective action; monitor progress.",
+      "responsible": "Management",
+      "timeframe": "30 Days",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 3,
+      "action": "Investigate root cause; implement corrective action; monitor progress.",
+      "responsible": "Management",
+      "timeframe": "30 Days",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 4,
+      "action": "Review all open NCRs; assign owners; set closure deadlines; escalate aged NCRs.",
+      "responsible": "Quality Manager",
+      "timeframe": "30 Days",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 5,
+      "action": "Engage late suppliers; review lead times; identify backup suppliers for critical materials.",
+      "responsible": "Procurement Manager",
+      "timeframe": "30 Days",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 6,
+      "action": "Identify out-of-qualification welders; schedule qualification tests; update training plan.",
+      "responsible": "HR / Workshop Supervisor",
+      "timeframe": "60 Days",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 7,
+      "action": "Root cause analysis on all repairs; re-test affected welders; increase weld inspection frequency.",
+      "responsible": "QC / Workshop Supervisor",
+      "timeframe": "Immediate",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 8,
+      "action": "Identify missing WPS documents; engage welding engineer to draft outstanding procedures.",
+      "responsible": "Quality Manager",
+      "timeframe": "30 Days",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 9,
+      "action": "Monitor closely; any increase triggers immediate corrective action; review inspection frequency.",
+      "responsible": "QC Manager",
+      "timeframe": "Monthly",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 10,
+      "action": "Review waste stream data; identify high-waste fabrication processes; implement lean practices.",
+      "responsible": "Operations Manager",
+      "timeframe": "Quarterly",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 11,
+      "action": "Conduct energy audit; identify high-consumption equipment; implement switch-off protocols.",
+      "responsible": "Operations / HSE",
+      "timeframe": "Quarterly",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 12,
+      "action": "Investigate root cause; implement corrective action; monitor progress.",
+      "responsible": "Management",
+      "timeframe": "30 Days",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 13,
+      "action": "Investigate root cause; implement corrective action; monitor progress.",
+      "responsible": "Management",
+      "timeframe": "30 Days",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 14,
+      "action": "Investigate root cause; implement corrective action; monitor progress.",
+      "responsible": "Management",
+      "timeframe": "30 Days",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 15,
+      "action": "Investigate all LTIs; review and update HIRA; implement corrective actions; brief all staff.",
+      "responsible": "HSE Manager / CEO",
+      "timeframe": "Immediate",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 16,
+      "action": "Investigate root cause of near-miss under-reporting; implement toolbox talks and reporting culture drive.",
+      "responsible": "Management",
+      "timeframe": "30 Days",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 17,
+      "action": "Investigate root cause; implement corrective action; monitor progress.",
+      "responsible": "Management",
+      "timeframe": "30 Days",
+      "actionStatus": "Open"
+    },
+    {
+      "id": 18,
+      "action": "Investigate root cause; implement corrective action; monitor progress.",
+      "responsible": "Management",
+      "timeframe": "30 Days",
+      "actionStatus": "Open"
+    }
+  ]
+}
