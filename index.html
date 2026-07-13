@@ -1711,9 +1711,9 @@ function getGhToken(forceNew = false) {
   let t = forceNew ? null : localStorage.getItem("fse_kpi_gh_token");
   if (!t) {
     t = prompt("Paste your GitHub Personal Access Token.\n(Fine-grained token with Contents: Read & Write on the -fse-kpi-dashboard repo.)\nIt is stored only in this browser.");
-    if (t) localStorage.setItem("fse_kpi_gh_token", t.trim());
+    if (t) { t = t.replace(/\s+/g, ""); localStorage.setItem("fse_kpi_gh_token", t); }
   }
-  return t ? t.trim() : null;
+  return t ? t.replace(/\s+/g, "") : null;
 }
 
 async function saveToGitHub(retry = false) {
@@ -1738,8 +1738,12 @@ async function saveToGitHub(retry = false) {
     };
     if (sha) body.sha = sha;
     const p = await fetch(api, { method: "PUT", headers: headers, body: JSON.stringify(body) });
-    if (p.status === 401 || p.status === 403) throw { auth: true };
-    if (!p.ok) throw new Error("GitHub returned " + p.status);
+    if (p.status === 401 || p.status === 403) throw { auth: true, status: p.status };
+    if (p.status === 404) throw new Error("404: token has no access to this repo -- recreate it with Only select repositories > -fse-kpi-dashboard and Contents: Read and write");
+    if (!p.ok) {
+      let gm = ""; try { gm = (await p.json()).message || ""; } catch (x) {}
+      throw new Error("GitHub " + p.status + (gm ? ": " + gm : ""));
+    }
     ghToast("Saved to GitHub -- data now visible to everyone");
   } catch (e) {
     btn.disabled = false; btn.textContent = "\uD83D\uDCBE Save";
@@ -1748,7 +1752,12 @@ async function saveToGitHub(retry = false) {
       ghToast("Token rejected -- please enter a new one", false);
       return saveToGitHub(true);
     }
-    ghToast("Save failed -- " + (e.message || "check connection or token"), false);
+    if (e && e.auth) {
+      localStorage.removeItem("fse_kpi_gh_token");
+      ghToast("GitHub rejected the token (" + (e.status || "auth") + ") -- the pasted code is wrong or expired", false);
+      return;
+    }
+    ghToast("Save failed -- " + (e.message || "no connection to api.github.com"), false);
     return;
   }
   btn.disabled = false; btn.textContent = "\uD83D\uDCBE Save";
