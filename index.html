@@ -1220,8 +1220,8 @@ function renderEditTable() {
       <td style="color:var(--muted);font-size:11px">${k.dir}</td>
       <td>${cell26}</td>
       <td>${cell25}</td>
-      <td>${yoyHTML(vt)}</td>
-      <td>${yoyHTML(yoy)}</td>
+      <td id="edit-vt-${idx}">${yoyHTML(vt)}</td>
+      <td id="edit-yoy-${idx}">${yoyHTML(yoy)}</td>
       <td id="edit-status-${idx}">${badgeHTML(s)}</td>
     </tr>`;
   });
@@ -1232,10 +1232,14 @@ function updateKPI(idx, field, val) {
   const num = parseFloat(val);
   if (isNaN(num)) return;
   KPIs[idx][field] = num;
-  // Update status cell in edit table
+  // Update status + variance cells in edit table live
   const s = getStatus(KPIs[idx]);
   const sc = document.getElementById("edit-status-" + idx);
   if (sc) sc.innerHTML = badgeHTML(s);
+  const vtc = document.getElementById("edit-vt-" + idx);
+  if (vtc) vtc.innerHTML = yoyHTML(vsTarget(KPIs[idx]));
+  const yc = document.getElementById("edit-yoy-" + idx);
+  if (yc) yc.innerHTML = yoyHTML(KPIs[idx].v26 - KPIs[idx].v25);
   // Refresh all computed views
   refreshAll();
 }
